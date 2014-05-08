@@ -93,32 +93,31 @@ else
 endif
 
 # USE_RESOLV: LIB_RESOLV
-
+#  if-else语句进行判断RESOLV函数库中函数是否重复
 LIB_RESOLV = $(call FUNC_LIB,$(USE_RESOLV),$(LDFLAG_RESOLV))
 
 # USE_CAP:  DEF_CAP, LIB_CAP
-
+#  if-else语句进行判断CAP函数库中函数是否重复
 ifneq ($(USE_CAP),no)
 	DEF_CAP = -DCAPABILITIES
 	LIB_CAP = $(call FUNC_LIB,$(USE_CAP),$(LDFLAG_CAP))
 endif
 
 # USE_SYSFS: DEF_SYSFS, LIB_SYSFS
-
+#  if-else语句进行判断SYSFS函数库中函数是否重复
 ifneq ($(USE_SYSFS),no)
 	DEF_SYSFS = -DUSE_SYSFS
 	LIB_SYSFS = $(call FUNC_LIB,$(USE_SYSFS),$(LDFLAG_SYSFS))
 endif
 
 # USE_IDN: DEF_IDN, LIB_IDN
-
+#  if-else语句进行判断IDN函数库中函数是否重复
 ifneq ($(USE_IDN),no)
 	DEF_IDN = -DUSE_IDN
 	LIB_IDN = $(call FUNC_LIB,$(USE_IDN),$(LDFLAG_IDN))
 endif
 
 # WITHOUT_IFADDRS: DEF_WITHOUT_IFADDRS
-
 ifneq ($(WITHOUT_IFADDRS),no)
 	DEF_WITHOUT_IFADDRS = -DWITHOUT_IFADDRS
 endif
@@ -152,6 +151,8 @@ TAG:=$(shell date --date=$(TODAY) +s%Y%m%d)
 
 
 # -------------------------------------
+#容错处理
+# .PHONY修饰的目标只有规则没有依赖
 .PHONY: all ninfod clean distclean man html check-kernel modules snapshot
 
 all: $(TARGETS)
@@ -163,8 +164,21 @@ all: $(TARGETS)
 $(TARGETS): %: %.o
 	$(LINK.o) $^ $(LIB_$@) $(LDLIBS) -o $@
 
+#
+# COMPILE.c=$(CC) $(CFLAGS) $(CPPFLAGS) -c
+# $< 依赖目标中的第一个目标名字 
+# $@ 表示目标
+# $^ 所有的依赖目标的集合 
+# 在$(patsubst %.o,%,$@ )中，patsubst把目标中的变量符合后缀是.o的全部删除,  DEF_ping
+# LINK.o把.o文件链接在一起的命令行,缺省值是$(CC) $(LDFLAGS) $(TARGET_ARCH)
+# $(patsubst %.o,%,$@) 的意思是把指定filename.o文件变为filename
+# patsubst函数：3个参数。功能是将第三个参数中的每一项（由空格分隔）符合第一个参数描述的部分替换成第二个参数制定的值
+
+
+
 # -------------------------------------
 # arping
+# 使用arping向目的主机发送ARP报文，通过目的主机的IP获得该主机的硬件地址
 DEF_arping = $(DEF_SYSFS) $(DEF_CAP) $(DEF_IDN) $(DEF_WITHOUT_IFADDRS)
 LIB_arping = $(LIB_SYSFS) $(LIB_CAP) $(LIB_IDN)
 
@@ -173,10 +187,12 @@ DEF_arping += -DDEFAULT_DEVICE=\"$(ARPING_DEFAULT_DEVICE)\"
 endif
 
 # clockdiff
+#使用clockdiff测算两台主机的系统时间差
 DEF_clockdiff = $(DEF_CAP)
 LIB_clockdiff = $(LIB_CAP)
 
 # ping / ping6
+# ping可以测试计算机名和计算机的ip地址，验证与远程计算机的连接
 DEF_ping_common = $(DEF_CAP) $(DEF_IDN)
 DEF_ping  = $(DEF_CAP) $(DEF_IDN) $(DEF_WITHOUT_IFADDRS)
 LIB_ping  = $(LIB_CAP) $(LIB_IDN)
