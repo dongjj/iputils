@@ -3,52 +3,77 @@
 #
 
 # CC
-CC=gcc
+#选择用gcc编译
+CC=gcc    
 # Path to parent kernel include files directory
-LIBC_INCLUDE=/usr/include
+#设置母核的文件目录的路径
+LIBC_INCLUDE=/usr/include   
 # Libraries
 ADDLIB=
-# Linker flags
+# Linker flags 
+#链接器标志
+
+# -Wl，-Bstatic告诉链接器使用-Bstatic选项，该选项是告诉链接器在接下来的-l选项中使用静态链接
 LDFLAG_STATIC=-Wl,-Bstatic
+# -Wl,-Bdynamic就是告诉链接器在接下来的-l选项中使用动态链接
 LDFLAG_DYNAMIC=-Wl,-Bdynamic
+# 指定加载库  CAP函数库
 LDFLAG_CAP=-lcap
+#TLS加密库
 LDFLAG_GNUTLS=-lgnutls-openssl
+# CRYPTO加密解密库
 LDFLAG_CRYPTO=-lcrypto
+# IDN恒等函数库
 LDFLAG_IDN=-lidn
+# RESOLV函数库
 LDFLAG_RESOLV=-lresolv
+# SYSFS接口函数库
 LDFLAG_SYSFS=-lsysfs
 
 #
-# Options
+# Options       
+#选项设置
 #
 
-# Capability support (with libcap) [yes|static|no]
+# Capability support (with libcap) [yes|static|no]     
+#支持定义（带库帽） [是/静态/否]  选择是
 USE_CAP=yes
-# sysfs support (with libsysfs - deprecated) [no|yes|static]
+# sysfs support (with libsysfs - deprecated) [no|yes|static]     
+#支持CAP库函数 [是/静态/否]  选择否
 USE_SYSFS=no
-# IDN support (experimental) [no|yes|static]
+# IDN support (experimental) [no|yes|static]    
+#支持IDN库函数 [是/静态/否]   选择否
 USE_IDN=no
 
-# Do not use getifaddrs [no|yes|static]
+# Do not use getifaddrs [no|yes|static]   
+# 不应用getif地址    [是/静态/否]   选择否
 WITHOUT_IFADDRS=no
 # arping default device (e.g. eth0) []
+# 默认为不执行ping MAC地址以及找出那些电脑所使用的ip地址的设置
 ARPING_DEFAULT_DEVICE=
 
 # GNU TLS library for ping6 [yes|no|static]
+#默认GNU TLS库ping6的状态  [是/静态/否]   选择是
 USE_GNUTLS=yes
 # Crypto library for ping6 [shared|static]
+#默认库密码为ping6 [共享/静态]   选择共享
 USE_CRYPTO=shared
 # Resolv library for ping6 [yes|static]
+#默认Resolv库ping6的状态  [是/静态]   选择是
 USE_RESOLV=yes
 # ping6 source routing (deprecated by RFC5095) [no|yes|RFC3542]
+#ping6源路由（被RFC5095废弃的）   [否/是/RFC3542]   选择否
 ENABLE_PING6_RTHDR=no
 
 # rdisc server (-r option) support [no|yes]
+# 支持rdisc服务器支持（-r选项）  [否/是]   选择否
 ENABLE_RDISC_SERVER=no
 
 # -------------------------------------
 # What a pity, all new gccs are buggy and -Werror does not work. Sigh.
+#令人遗憾的是，gcc异常， -Werror失效
 # CCOPT=-fno-strict-aliasing -Wstrict-prototypes -Wall -Werror -g
+#-Wstrict-prototypes: 如果函数的声明或定义没有指出参数类型，编译器就发出警告
 CCOPT=-fno-strict-aliasing -Wstrict-prototypes -Wall -g
 CCOPTOPT=-O3
 GLIBCFIX=-D_GNU_SOURCE
@@ -59,6 +84,7 @@ FUNC_LIB = $(if $(filter static,$(1)),$(LDFLAG_STATIC) $(2) $(LDFLAG_DYNAMIC),$(
 
 # USE_GNUTLS: DEF_GNUTLS, LIB_GNUTLS
 # USE_CRYPTO: LIB_CRYPTO
+# if-else语句进行判断CRYPTO函数库中的函数是否重复
 ifneq ($(USE_GNUTLS),no)
 	LIB_CRYPTO = $(call FUNC_LIB,$(USE_GNUTLS),$(LDFLAG_GNUTLS))
 	DEF_CRYPTO = -DUSE_GNUTLS
@@ -67,27 +93,32 @@ else
 endif
 
 # USE_RESOLV: LIB_RESOLV
+
 LIB_RESOLV = $(call FUNC_LIB,$(USE_RESOLV),$(LDFLAG_RESOLV))
 
 # USE_CAP:  DEF_CAP, LIB_CAP
+
 ifneq ($(USE_CAP),no)
 	DEF_CAP = -DCAPABILITIES
 	LIB_CAP = $(call FUNC_LIB,$(USE_CAP),$(LDFLAG_CAP))
 endif
 
 # USE_SYSFS: DEF_SYSFS, LIB_SYSFS
+
 ifneq ($(USE_SYSFS),no)
 	DEF_SYSFS = -DUSE_SYSFS
 	LIB_SYSFS = $(call FUNC_LIB,$(USE_SYSFS),$(LDFLAG_SYSFS))
 endif
 
 # USE_IDN: DEF_IDN, LIB_IDN
+
 ifneq ($(USE_IDN),no)
 	DEF_IDN = -DUSE_IDN
 	LIB_IDN = $(call FUNC_LIB,$(USE_IDN),$(LDFLAG_IDN))
 endif
 
 # WITHOUT_IFADDRS: DEF_WITHOUT_IFADDRS
+
 ifneq ($(WITHOUT_IFADDRS),no)
 	DEF_WITHOUT_IFADDRS = -DWITHOUT_IFADDRS
 endif
