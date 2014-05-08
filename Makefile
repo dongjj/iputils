@@ -205,14 +205,17 @@ ping.o ping_common.o: ping_common.h
 ping6.o: ping_common.h in6_flowlabel.h
 
 # rarpd
+# rarpd是逆地址解析协议的服务端程序。
 DEF_rarpd =
 LIB_rarpd =
 
 # rdisc
+# rdisc是路由器发现守护程序。
 DEF_rdisc = $(DEF_ENABLE_RDISC_SERVER)
 LIB_rdisc =
 
 # tracepath
+# tracepath测试IP数据报文从源主机传到目的主机经过的路由
 DEF_tracepath = $(DEF_IDN)
 LIB_tracepath = $(LIB_IDN)
 
@@ -225,6 +228,7 @@ DEF_traceroute6 = $(DEF_CAP) $(DEF_IDN)
 LIB_traceroute6 = $(LIB_CAP) $(LIB_IDN)
 
 # tftpd
+# tftpd是简单文件传送协议TFTP的服务端程序
 DEF_tftpd =
 DEF_tftpsubs =
 LIB_tftpd =
@@ -235,19 +239,19 @@ tftpd.o tftpsubs.o: tftp.h
 # -------------------------------------
 # ninfod
 ninfod:
-	@set -e; \
-		if [ ! -f ninfod/Makefile ]; then \
-			cd ninfod; \
+	@set -e; \ # 如果命令带非零值返回,立即退出
+		if [ ! -f ninfod/Makefile ]; then \ # 当file存在并且是正规文件时返回真
+			cd ninfod; \ # 返回指定目录
 			./configure; \
 			cd ..; \
-		fi; \
+		fi; \ # if语句的结尾
 		$(MAKE) -C ninfod
 
 # -------------------------------------
 # modules / check-kernel are only for ancient kernels; obsolete
 check-kernel:
 ifeq ($(KERNEL_INCLUDE),)
-	@echo "Please, set correct KERNEL_INCLUDE"; false
+	@echo "Please, set correct KERNEL_INCLUDE"; false #显示
 else
 	@set -e; \
 	if [ ! -r $(KERNEL_INCLUDE)/linux/autoconf.h ]; then \
@@ -264,6 +268,7 @@ man:
 html:
 	$(MAKE) -C doc html
 
+# clean 删除已生成的目标文件
 clean:
 	@rm -f *.o $(TARGETS)
 	@$(MAKE) -C Modules clean
